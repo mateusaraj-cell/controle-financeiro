@@ -63,7 +63,13 @@ button { padding:6px 10px; cursor:pointer; }
 <div id="lista"></div>
 
 <script>
-let lancamentos = JSON.parse(localStorage.getItem("lancamentos")) || [];
+let lancamentos = [];
+
+try {
+  lancamentos = JSON.parse(localStorage.getItem("lancamentos")) || [];
+} catch (e) {
+  lancamentos = [];
+}
 let filtro = "total";
 
 function setFiltro(f) {
