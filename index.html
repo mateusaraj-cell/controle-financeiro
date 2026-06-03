@@ -5,100 +5,107 @@
 <title>Controle Financeiro PRO</title>
 
 <style>
-body { font-family: Arial; padding:20px; }
-input, select { margin:5px; padding:5px; }
-button { padding:6px 10px; cursor:pointer; }
+body {
+  font-family: Arial;
+  margin:0;
+  display:flex;
+}
+
+/* MENU */
+.menu {
+  width:200px;
+  background:#111;
+  color:#fff;
+  height:100vh;
+  padding:10px;
+}
+
+.menu div {
+  padding:10px;
+  cursor:pointer;
+}
+
+.menu div:hover {
+  background:#333;
+}
+
+/* CONTEÚDO */
+.conteudo {
+  flex:1;
+  padding:20px;
+}
+
+.tela {
+  display:none;
+}
+
+.tela.ativa {
+  display:block;
+}
+
 .card {
   border:1px solid #ccc;
   padding:10px;
   margin-top:10px;
 }
 </style>
-</head>
 
+</head>
 <body>
 
-<h1>💳 Controle Financeiro PRO</h1>
+<!-- MENU -->
+<div class="menu">
+  <div onclick="abrir('dashboard')">📊 Dashboard</div>
+  <div onclick="abrir('fixos')">📌 P. Fixos</div>
+  <div onclick="abrir('cartoes')">💳 P. Cartões</div>
+  <div onclick="abrir('fatura')">📄 T. Cartões</div>
+  <div onclick="abrir('receber')">💰 Receber</div>
+</div>
 
-<input id="desc" placeholder="Descrição">
-<input id="valor" type="number" placeholder="Valor">
-<input id="parcelas" type="number" value="1">
+<!-- CONTEÚDO -->
+<div class="conteudo">
 
-<select id="cartao">
-  <option>Nubank</option>
-  <option>Itaú</option>
-  <option>Inter</option>
-</select>
+  <!-- DASHBOARD -->
+  <div id="dashboard" class="tela ativa">
+    <h2>Dashboard</h2>
+    <p>Total: R$ <span id="total">0</span></p>
+  </div>
 
-<button onclick="adicionar()">Adicionar</button>
+  <!-- CARTÕES -->
+  <div id="cartoes" class="tela">
+    <h2>Parcelas Cartão</h2>
 
-<h2>Total: R$ <span id="total">0</span></h2>
+    <input id="desc" placeholder="Descrição">
+    <input id="valor" type="number" placeholder="Valor">
+    <input id="parcelas" type="number" value="1">
 
-<h3>Lançamentos</h3>
-<div id="lista"></div>
+    <button onclick="adicionar()">Adicionar</button>
+
+    <div id="lista"></div>
+  </div>
+
+  <!-- FATURA -->
+  <div id="fatura" class="tela">
+    <h2>Fatura por mês</h2>
+    <div id="faturas"></div>
+  </div>
+
+  <!-- FIXOS -->
+  <div id="fixos" class="tela">
+    <h2>Pagamentos Fixos</h2>
+    <p>(vamos adicionar depois)</p>
+  </div>
+
+  <!-- RECEBER -->
+  <div id="receber" class="tela">
+    <h2>A Receber</h2>
+    <p>(vamos adicionar depois)</p>
+  </div>
+
+</div>
 
 <script>
 
-let lancamentos = JSON.parse(localStorage.getItem("lancamentos")) || [];
-
-function adicionar() {
-
-  const desc = document.getElementById("desc").value;
-  const valor = parseFloat(document.getElementById("valor").value);
-  const parcelas = parseInt(document.getElementById("parcelas").value);
-  const cartao = document.getElementById("cartao").value;
-
-  if (!desc || isNaN(valor) || isNaN(parcelas) || parcelas <= 0) {
-    alert("Preencha corretamente");
-    return;
-  }
-
-  const valorParcela = valor / parcelas;
-
-  for (let i = 1; i <= parcelas; i++) {
-
-    const data = new Date();
-    data.setMonth(data.getMonth() + (i - 1));
-
-    lancamentos.push({
-      desc: desc + " (" + i + "/" + parcelas + ")",
-      valor: valorParcela,
-      cartao,
-      data
-    });
-  }
-
-  localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
-
-  atualizar();
-}
-
-function atualizar() {
-
-  let total = 0;
-  let lista = document.getElementById("lista");
-
-  lista.innerHTML = "";
-
-  lancamentos.forEach(l => {
-
-    total += l.valor;
-
-    lista.innerHTML += `
-      <div class="card">
-        ${l.desc} - R$ ${l.valor.toFixed(2)} <br>
-        ${l.cartao}
-      </div>
-    `;
-  });
-
-  document.getElementById("total").innerText = total.toFixed(2);
-}
-
-atualizar();
-
-</script>
-
-</body>
-</html>
-``
+// trocar telas
+function abrir(tela) {
+  document.querySelectorAll(".tela").forEach(t => t.classList.remove("ativa"));
