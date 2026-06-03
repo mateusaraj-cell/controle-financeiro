@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Controle Financeiro PRO</title>
+<title>Controle Financeiro</title>
 
 <style>
 body {
@@ -37,8 +37,13 @@ body {
   padding:20px;
 }
 
-.tela { display:none; }
-.tela.ativa { display:block; }
+.tela {
+  display:none;
+}
+
+.tela.ativa {
+  display:block;
+}
 
 .card {
   background:#1e293b;
@@ -49,3 +54,139 @@ body {
 
 input {
   margin:5px;
+  padding:8px;
+}
+
+button.acao {
+  padding:8px 12px;
+  cursor:pointer;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="menu">
+  <button onclick="abrir('dashboard')">📊 Dashboard</button>
+  <button onclick="abrir('pessoal')">💳 Pessoal</button>
+  <button onclick="abrir('terceiros')">👥 Terceiros</button>
+  <button onclick="abrir('receber')">💰 Receber</button>
+</div>
+
+<div class="conteudo">
+
+<div id="dashboard" class="tela ativa">
+  <h2>Dashboard</h2>
+  <h3>Total: R$ <span id="total">0</span></h3>
+</div>
+
+<div id="pessoal" class="tela">
+  <h2>Pessoal</h2>
+  <input id="desc" placeholder="Descrição">
+  <input id="valor" type="number" placeholder="Valor">
+  <button class="acao" onclick="addPessoal()">Adicionar</button>
+  <div id="listaP"></div>
+</div>
+
+<div id="terceiros" class="tela">
+  <h2>Terceiros</h2>
+  <input id="nome" placeholder="Pessoa">
+  <input id="valorT" type="number" placeholder="Valor">
+  <button class="acao" onclick="addTerceiro()">Adicionar</button>
+  <div id="listaT"></div>
+</div>
+
+<div id="receber" class="tela">
+  <h2>Receber</h2>
+  <input id="busca" placeholder="Nome">
+  <button class="acao" onclick="buscar()">Buscar</button>
+  <div id="resultado"></div>
+</div>
+
+</div>
+
+<script>
+
+function abrir(tela) {
+  var telas = document.querySelectorAll(".tela");
+
+  for (var i = 0; i < telas.length; i++) {
+    telas[i].classList.remove("ativa");
+  }
+
+  document.getElementById(tela).classList.add("ativa");
+}
+
+var dados = JSON.parse(localStorage.getItem("dados")) || [];
+
+function addPessoal() {
+  var desc = document.getElementById("desc").value;
+  var valor = parseFloat(document.getElementById("valor").value);
+
+  if (!desc || isNaN(valor)) return;
+
+  dados.push({desc: desc, valor: valor, tipo: "meu"});
+  salvar();
+}
+
+function addTerceiro() {
+  var nome = document.getElementById("nome").value;
+  var valor = parseFloat(document.getElementById("valorT").value);
+
+  if (!nome || isNaN(valor)) return;
+
+  dados.push({desc: nome, valor: valor, tipo: "terceiro"});
+  salvar();
+}
+
+function salvar() {
+  localStorage.setItem("dados", JSON.stringify(dados));
+  atualizar();
+}
+
+function buscar() {
+  var nome = document.getElementById("busca").value;
+
+  var total = 0;
+  var html = "";
+
+  for (var i = 0; i < dados.length; i++) {
+    if (dados[i].tipo === "terceiro" && dados[i].desc === nome) {
+      total += dados[i].valor;
+      html += "<div class='card'>" + dados[i].desc + " - R$ " + dados[i].valor + "</div>";
+    }
+  }
+
+  html += "<h3>Total: R$ " + total.toFixed(2) + "</h3>";
+
+  document.getElementById("resultado").innerHTML = html;
+}
+
+function atualizar() {
+  var total = 0;
+
+  var lp = document.getElementById("listaP");
+  var lt = document.getElementById("listaT");
+
+  lp.innerHTML = "";
+  lt.innerHTML = "";
+
+  for (var i = 0; i < dados.length; i++) {
+    total += dados[i].valor;
+
+    var item = "<div class='card'>" + dados[i].desc + " - R$ " + dados[i].valor + "</div>";
+
+    if (dados[i].tipo === "meu") lp.innerHTML += item;
+    if (dados[i].tipo === "terceiro") lt.innerHTML += item;
+  }
+
+  document.getElementById("total").innerText = total.toFixed(2);
+}
+
+atualizar();
+
+</script>
+
+</body>
+</html>
