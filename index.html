@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Controle Financeiro PRO</title>
+<title>Controle Financeiro</title>
 
 <style>
 body {
@@ -43,3 +43,27 @@ body {
 }
 
 input {
+  margin:5px;
+  padding:8px;
+}
+
+button {
+  padding:8px 12px;
+  cursor:pointer;
+}
+</style>
+
+</head>
+<body>
+
+<div class="menu">
+  <div onclick="trocar('dashboard')">📊 Dashboard</div>
+  <div onclick="trocar('pessoal')">💳 Pessoal</div>
+  <div onclick="trocar('terceiros')">👥 Terceiros</div>
+  <div onclick="trocar('receber')">💰 Receber</div>
+</div>
+
+<div class="conteudo">
+
+<div id="dashboard" class="tela ativa">
+  <h2>Dashboard</h2>
