@@ -2,115 +2,20 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Controle Financeiro</title>
-
-<style>
-body { font-family: Arial; padding:20px; }
-input, select { margin:5px; padding:5px; }
-button { padding:6px 10px; cursor:pointer; }
-.card {
-  border:1px solid #ccc;
-  padding:10px;
-  margin-bottom:10px;
-  border-radius:8px;
-}
-.filtro button {
-  margin-right:5px;
-}
-</style>
-
+<title>Teste</title>
 </head>
 
 <body>
 
-<h1>💳 Controle Financeiro PRO</h1>
+<h1>Teste JS</h1>
 
-<input id="desc" placeholder="Descrição">
-<input id="valor" type="number" placeholder="Valor total">
-<input id="parcelas" type="number" value="1">
-
-<select id="tipo">
-  <option value="meu">Meu</option>
-  <option value="terceiro">Terceiro</option>
-</select>
-
-<input id="pessoa" placeholder="Pessoa (se terceiro)">
-
-<select id="cartao">
-  <option>Nubank</option>
-  <option>Itaú</option>
-  <option>Inter</option>
-</select>
-
-<button onclick="adicionar()">Adicionar</button>
-
-<h2>Total: R$ <span id="total">0</span></h2>
-
-<h3>Fatura</h3>
-<div id="fatura"></div>
-
-<h3>Lançamentos</h3>
-<div id="lista"></div>
+<button onclick="adicionar()">Clique</button>
 
 <script>
-let lancamentos = [];
-
-try {
-  lancamentos = JSON.parse(localStorage.getItem("lancamentos")) || [];
-} catch {
-  lancamentos = [];
-}
-
 function adicionar() {
-  const desc = document.getElementById("desc").value;
-  const valor = parseFloat(document.getElementById("valor").value);
-  const parcelas = parseInt(document.getElementById("parcelas").value);
-
-  if (!desc || isNaN(valor) || isNaN(parcelas) || parcelas <= 0) {
-    alert("Preencha corretamente");
-    return;
-  }
-
-  let valorParcela = valor / parcelas;
-
-  for (let i = 1; i <= parcelas; i++) {
-    let data = new Date();
-    data.setMonth(data.getMonth() + (i - 1));
-
-    lancamentos.push({
-      desc: desc + " (" + i + "/" + parcelas + ")",
-      valor: valorParcela,
-      data
-    });
-  }
-
-  localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
-
-  atualizar();
+  alert("FUNCIONOU ✅");
 }
-
-function atualizar() {
-  let total = 0;
-  let lista = document.getElementById("lista");
-
-  lista.innerHTML = "";
-
-  lancamentos.forEach(l => {
-    total += l.valor;
-
-    lista.innerHTML += `
-      <div class="card">
-        ${l.desc} - R$ ${l.valor.toFixed(2)}
-      </div>
-    `;
-  });
-
-  document.getElementById("total").textContent = total.toFixed(2);
-}
-
-atualizar();
 </script>
 
 </body>
 </html>
-``
