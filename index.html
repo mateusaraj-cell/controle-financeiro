@@ -2,19 +2,74 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Teste</title>
+<title>Controle Financeiro</title>
+
+<style>
+body { font-family: Arial; padding:20px; }
+input { margin:5px; padding:5px; }
+button { padding:6px 10px; }
+.card {
+  border:1px solid #ccc;
+  padding:10px;
+  margin-top:10px;
+}
+</style>
+
 </head>
 
 <body>
 
-<h1>Teste JS</h1>
+<h1>💳 Controle Financeiro</h1>
 
-<button onclick="adicionar()">Clique</button>
+<input id="desc" placeholder="Descrição">
+<input id="valor" type="number" placeholder="Valor">
+<button onclick="adicionar()">Adicionar</button>
+
+<h2>Total: R$ <span id="total">0</span></h2>
+
+<div id="lista"></div>
 
 <script>
+
+let lancamentos = JSON.parse(localStorage.getItem("lancamentos")) || [];
+
 function adicionar() {
-  alert("FUNCIONOU ✅");
+  const desc = document.getElementById("desc").value;
+  const valor = parseFloat(document.getElementById("valor").value);
+
+  if (!desc || isNaN(valor)) {
+    alert("Preencha corretamente");
+    return;
+  }
+
+  lancamentos.push({ desc, valor });
+
+  localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
+
+  atualizar();
 }
+
+function atualizar() {
+  let total = 0;
+  let lista = document.getElementById("lista");
+
+  lista.innerHTML = "";
+
+  lancamentos.forEach(l => {
+    total += l.valor;
+
+    lista.innerHTML += `
+      <div class="card">
+        ${l.desc} - R$ ${l.valor}
+      </div>
+    `;
+  });
+
+  document.getElementById("total").innerText = total.toFixed(2);
+}
+
+atualizar();
+
 </script>
 
 </body>
