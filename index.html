@@ -63,7 +63,7 @@ button { padding:6px 10px; cursor:pointer; }
 <div id="lista"></div>
 
 <script>
-let lancamentos = [];
+let lancamentos = JSON.parse(localStorage.getItem("lancamentos")) || [];
 let filtro = "total";
 
 function setFiltro(f) {
@@ -93,6 +93,7 @@ function adicionar() {
       cartao,
       data
     });
+    localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
   }
 
   atualizar();
@@ -145,6 +146,7 @@ function atualizar() {
     }
   }
 }
+  atualizar();
 </script>
 
 </body>
