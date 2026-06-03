@@ -2,16 +2,50 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Sistema</title>
-</head>
+<title>Controle Financeiro PRO</title>
 
-<body>
+<style>
+body {
+  margin:0;
+  font-family: Arial;
+  display:flex;
+  background:#0f172a;
+  color:white;
+}
 
-<h1>SISTEMA OK ✅</h1>
+.menu {
+  width:220px;
+  background:#020617;
+}
 
-<script>
-console.log("JS funcionando");
-</script>
+.menu button {
+  width:100%;
+  padding:15px;
+  border:none;
+  background:none;
+  color:white;
+  text-align:left;
+  cursor:pointer;
+}
 
-</body>
-</html>
+.menu button:hover {
+  background:#1e293b;
+}
+
+.conteudo {
+  flex:1;
+  padding:20px;
+}
+
+.tela { display:none; }
+.tela.ativa { display:block; }
+
+.card {
+  background:#1e293b;
+  padding:10px;
+  margin-top:10px;
+  border-radius:8px;
+}
+
+input {
+  margin:5px;
