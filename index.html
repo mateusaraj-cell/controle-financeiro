@@ -67,7 +67,7 @@ button { padding:6px 10px; cursor:pointer; }
 
 <script>
 
-// ✅ carregar dados com segurança
+// carregar dados com segurança
 let lancamentos = [];
 
 try {
@@ -78,13 +78,11 @@ try {
 
 let filtro = "total";
 
-// ✅ mudar filtro
 function setFiltro(f) {
   filtro = f;
   atualizar();
 }
 
-// ✅ adicionar lançamento
 function adicionar() {
   const desc = document.getElementById("desc").value;
   const valor = parseFloat(document.getElementById("valor").value);
@@ -93,7 +91,6 @@ function adicionar() {
   const pessoa = document.getElementById("pessoa").value;
   const cartao = document.getElementById("cartao").value;
 
-  // ✅ validação
   if (!desc || isNaN(valor) || isNaN(parcelas) || parcelas <= 0) {
     alert("Preencha todos os campos corretamente!");
     return;
@@ -115,3 +112,69 @@ function adicionar() {
     });
   }
 
+  localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
+
+  atualizar();
+
+  // limpar campos
+  document.getElementById("desc").value = "";
+  document.getElementById("valor").value = "";
+  document.getElementById("parcelas").value = 1;
+  document.getElementById("pessoa").value = "";
+}
+
+function atualizar() {
+  let total = 0;
+  let lista = document.getElementById("lista");
+  let fatura = document.getElementById("fatura");
+
+  lista.innerHTML = "";
+  fatura.innerHTML = "";
+
+  let agrupado = {};
+
+  lancamentos.forEach(l => {
+
+    if (filtro === "meu" && l.tipo !== "meu") return;
+    if (filtro === "terceiro" && l.tipo !== "terceiro") return;
+
+    total += l.valor;
+
+    lista.innerHTML += `
+      <div class="card">
+        ${l.desc}<br>
+        R$ ${l.valor.toFixed(2)}<br>
+        ${l.cartao} | ${new Date(l.data).toLocaleDateString()}
+      </div>
+    `;
+
+    let dataObj = new Date(l.data);
+    let mes = (dataObj.getMonth()+1) + "/" + dataObj.getFullYear();
+
+    if (!agrupado[l.cartao]) agrupado[l.cartao] = {};
+    if (!agrupado[l.cartao][mes]) agrupado[l.cartao][mes] = 0;
+
+    agrupado[l.cartao][mes] += l.valor;
+  });
+
+  document.getElementById("total").innerText = total.toFixed(2);
+
+  for (let cartao in agrupado) {
+    fatura.innerHTML += `<h4>${cartao}</h4>`;
+
+    for (let mes in agrupado[cartao]) {
+      fatura.innerHTML += `
+        <div class="card">
+          ${mes} → R$ ${agrupado[cartao][mes].toFixed(2)}
+        </div>
+      `;
+    }
+  }
+}
+
+atualizar();
+
+</script>
+
+</body>
+</html>
