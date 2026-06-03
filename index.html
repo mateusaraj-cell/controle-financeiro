@@ -2,95 +2,147 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Controle Financeiro PRO</title>
+<title>Finance App</title>
 
 <style>
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin:0;
-  font-family: Arial;
+  font-family: 'Segoe UI', Arial;
   display:flex;
-  background:#0f172a;
+  background:#0b0f1a;
   color:white;
 }
 
+/* MENU */
 .menu {
   width:240px;
-  background:#020617;
+  background:#111827;
+  padding-top:20px;
+}
+
+.menu h2 {
+  text-align:center;
+  margin-bottom:30px;
+  color:#a78bfa;
 }
 
 .menu button {
-  width:100%;
+  width:90%;
+  margin:5px auto;
+  display:block;
   padding:14px;
   border:none;
   background:none;
-  color:white;
+  color:#cbd5e1;
   text-align:left;
+  border-radius:8px;
   cursor:pointer;
+  transition:0.2s;
 }
 
 .menu button:hover {
-  background:#1e293b;
+  background:#1f2937;
+  color:white;
 }
 
+/* CONTEÚDO */
 .conteudo {
   flex:1;
-  padding:20px;
+  padding:30px;
 }
 
-.tela { display:none; }
-.tela.ativa { display:block; }
+/* TELAS */
+.tela {
+  display:none;
+}
 
+.tela.ativa {
+  display:block;
+}
+
+/* CARDS */
 .card {
-  background:#1e293b;
-  padding:10px;
-  margin-top:10px;
-  border-radius:8px;
+  background:#111827;
+  padding:15px;
+  margin-top:15px;
+  border-radius:10px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.3);
 }
 
-input, select {
+/* INPUTS */
+input {
   margin:5px;
-  padding:8px;
+  padding:12px;
+  border-radius:8px;
+  border:none;
+  background:#1f2937;
+  color:white;
 }
 
+/* BOTÕES */
 button.acao {
-  padding:8px 12px;
+  padding:12px;
+  margin-top:10px;
+  border:none;
+  border-radius:8px;
+  background:#7c3aed;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+button.acao:hover {
+  background:#6d28d9;
+}
+
+/* TITULOS */
+h2 {
+  margin-bottom:15px;
+}
+
+h3 {
+  color:#a78bfa;
 }
 </style>
+
 </head>
 
 <body>
 
 <div class="menu">
+  <h2>💳 Finance</h2>
+
   <button onclick="abrir('dashboard')">📊 Dashboard</button>
-  <button onclick="abrir('fixos')">📌 Contas Fixas</button>
-  <button onclick="abrir('pessoal')">💳 Pessoal Cartão</button>
-  <button onclick="abrir('terceiros')">👥 Terceiros Cartão</button>
-  <button onclick="abrir('receber')">💰 Receber Terceiros</button>
-  <button onclick="abrir('config')">⚙️ Configurações</button>
+  <button onclick="abrir('fixos')">📌 Fixos</button>
+  <button onclick="abrir('pessoal')">💳 Pessoal</button>
+  <button onclick="abrir('terceiros')">👥 Terceiros</button>
+  <button onclick="abrir('receber')">💰 Receber</button>
 </div>
 
 <div class="conteudo">
 
-<!-- DASHBOARD -->
 <div id="dashboard" class="tela ativa">
   <h2>Dashboard</h2>
   <h3>Total: R$ <span id="total">0</span></h3>
 </div>
 
-<!-- FIXOS -->
 <div id="fixos" class="tela">
   <h2>Contas Fixas</h2>
 
   <input id="fixoDesc" placeholder="Descrição">
   <input id="fixoValor" type="number" placeholder="Valor">
+
   <button class="acao" onclick="addFixo()">Adicionar</button>
 
   <div id="listaFixos"></div>
 </div>
 
-<!-- PESSOAL -->
 <div id="pessoal" class="tela">
-  <h2>Pessoal Cartão</h2>
+  <h2>Pessoal</h2>
 
   <input id="descP" placeholder="Descrição">
   <input id="valorP" type="number" placeholder="Valor">
@@ -101,45 +153,35 @@ button.acao {
   <div id="listaPessoal"></div>
 </div>
 
-<!-- TERCEIROS -->
 <div id="terceiros" class="tela">
-  <h2>Terceiros Cartão</h2>
+  <h2>Terceiros</h2>
 
   <input id="descT" placeholder="Descrição">
   <input id="pessoaT" placeholder="Pessoa">
   <input id="valorT" type="number" placeholder="Valor">
-  <input id="parcelasT" type="number" value="1">
 
   <button class="acao" onclick="addTerceiro()">Adicionar</button>
 
   <div id="listaTerceiros"></div>
 </div>
 
-<!-- RECEBER -->
 <div id="receber" class="tela">
-  <h2>Receber Terceiros</h2>
+  <h2>Receber</h2>
 
-  <input id="fNome" placeholder="Nome">
-  <input id="fMes" placeholder="Ex: 6/2026">
+  <input id="buscaNome" placeholder="Nome">
 
-  <button class="acao" onclick="buscarReceber()">Buscar</button>
+  <button class="acao" onclick="buscar()">Buscar</button>
 
   <div id="resultado"></div>
-</div>
-
-<!-- CONFIG -->
-<div id="config" class="tela">
-  <h2>Configurações</h2>
-  <p>(expansão futura: cartões, categorias)</p>
 </div>
 
 </div>
 
 <script>
 
-function abrir(t){
+function abrir(tela){
   document.querySelectorAll(".tela").forEach(el => el.classList.remove("ativa"));
-  document.getElementById(t).classList.add("ativa");
+  document.getElementById(tela).classList.add("ativa");
 }
 
 let dados = JSON.parse(localStorage.getItem("dados")) || [];
@@ -166,14 +208,10 @@ function addPessoal(){
   let vp = v/p;
 
   for(let i=1;i<=p;i++){
-    let data = new Date();
-    data.setMonth(data.getMonth()+(i-1));
-
     dados.push({
       tipo:"pessoal",
       desc:d+" ("+i+"/"+p+")",
-      valor:vp,
-      data:data
+      valor:vp
     });
   }
 
@@ -185,61 +223,44 @@ function addTerceiro(){
   let d = document.getElementById("descT").value;
   let nome = document.getElementById("pessoaT").value;
   let v = parseFloat(document.getElementById("valorT").value);
-  let p = parseInt(document.getElementById("parcelasT").value);
 
-  if(!d || !nome || isNaN(v) || isNaN(p)) return;
+  if(!d || !nome || isNaN(v)) return;
 
-  let vp = v/p;
-
-  for(let i=1;i<=p;i++){
-    let data = new Date();
-    data.setMonth(data.getMonth()+(i-1));
-
-    dados.push({
-      tipo:"terceiro",
-      pessoa:nome,
-      desc:d+" ("+i+"/"+p+")",
-      valor:vp,
-      data:data
-    });
-  }
+  dados.push({
+    tipo:"terceiro",
+    desc:d,
+    pessoa:nome,
+    valor:v
+  });
 
   salvar();
 }
 
-// RECEBER
-function buscarReceber(){
-
-  let nome = document.getElementById("fNome").value;
-  let mes = document.getElementById("fMes").value;
+// BUSCAR
+function buscar(){
+  let nome = document.getElementById("buscaNome").value;
 
   let total=0;
   let html="";
 
   dados.forEach(d=>{
-
-    if(d.tipo==="terceiro"){
-      let dt=new Date(d.data);
-      let m=(dt.getMonth()+1)+"/"+dt.getFullYear();
-
-      if(d.pessoa===nome && m===mes){
-        total+=d.valor;
-        html+=`<div class="card">${d.desc} - R$ ${d.valor}</div>`;
-      }
+    if(d.tipo==="terceiro" && d.pessoa===nome){
+      total+=d.valor;
+      html+=`<div class="card">${d.desc} - R$ ${d.valor}</div>`;
     }
   });
 
   html+=`<h3>Total: R$ ${total.toFixed(2)}</h3>`;
+
   document.getElementById("resultado").innerHTML=html;
 }
 
-// SALVAR
+// SALVAR / UPDATE
 function salvar(){
   localStorage.setItem("dados", JSON.stringify(dados));
   atualizar();
 }
 
-// ATUALIZAR
 function atualizar(){
 
   let total=0;
