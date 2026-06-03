@@ -53,3 +53,217 @@ body {
 <div class="menu">
   <div onclick="abrir('dashboard')">📊 Dashboard</div>
   <div onclick="abrir('cartoes')">💳 P. Cartões</div>
+  <div onclick="abrir('fatura')">📄 Fatura</div>
+  <div onclick="abrir('receber')">💰 Receber</div>
+  <div onclick="abrir('config')">⚙️ Configurações</div>
+</div>
+
+<div class="conteudo">
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="tela ativa">
+  <h2>Dashboard</h2>
+  <p>Total: R$ <span id="total">0</span></p>
+</div>
+
+<!-- CARTÕES -->
+<div id="cartoes" class="tela">
+  <h2>Lançamento no Cartão</h2>
+
+  <input id="desc" placeholder="Descrição">
+  <input id="valor" type="number" placeholder="Valor">
+  <input id="parcelas" type="number" value="1">
+
+  <select id="tipo">
+    <option value="meu">Meu</option>
+    <option value="terceiro">Terceiro</option>
+  </select>
+
+  <input id="pessoa" placeholder="Pessoa (se terceiro)">
+
+  <select id="cartao"></select>
+
+  <button onclick="adicionar()">Adicionar</button>
+
+  <div id="lista"></div>
+</div>
+
+<!-- FATURA -->
+<div id="fatura" class="tela">
+  <h2>Fatura por mês</h2>
+  <div id="faturas"></div>
+</div>
+
+<!-- RECEBER -->
+<div id="receber" class="tela">
+  <h2>A Receber</h2>
+  <div id="listaReceber"></div>
+</div>
+
+<!-- CONFIG -->
+<div id="config" class="tela">
+  <h2>Configurações</h2>
+
+  <h4>Cartões</h4>
+  <input id="novoCartao" placeholder="Novo cartão">
+  <button onclick="addCartao()">Adicionar</button>
+
+  <div id="listaCartoes"></div>
+</div>
+
+</div>
+
+<script>
+
+// trocar telas
+function abrir(tela) {
+  document.querySelectorAll(".tela").forEach(t => t.classList.remove("ativa"));
+  document.getElementById(tela).classList.add("ativa");
+}
+
+// dados
+let lancamentos = JSON.parse(localStorage.getItem("lancamentos")) || [];
+let cartoes = JSON.parse(localStorage.getItem("cartoes")) || ["Nubank","Itaú"];
+
+// adicionar lançamento
+function adicionar() {
+
+  const desc = document.getElementById("desc").value;
+  const valor = parseFloat(document.getElementById("valor").value);
+  const parcelas = parseInt(document.getElementById("parcelas").value);
+  const tipo = document.getElementById("tipo").value;
+  const pessoa = document.getElementById("pessoa").value;
+  const cartao = document.getElementById("cartao").value;
+
+  if (!desc || isNaN(valor) || isNaN(parcelas) || parcelas <= 0) {
+    alert("Preencha corretamente");
+    return;
+  }
+
+  const valorParcela = valor / parcelas;
+
+  for (let i = 1; i <= parcelas; i++) {
+
+    let data = new Date();
+    data.setMonth(data.getMonth() + (i - 1));
+
+    lancamentos.push({
+      desc: desc + " (" + i + "/" + parcelas + ")",
+      valor: valorParcela,
+      tipo,
+      pessoa,
+      cartao,
+      data
+    });
+  }
+
+  localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
+
+  atualizar();
+}
+
+// adicionar cartão
+function addCartao() {
+  let nome = document.getElementById("novoCartao").value;
+
+  if (!nome) return;
+
+  cartoes.push(nome);
+
+  localStorage.setItem("cartoes", JSON.stringify(cartoes));
+
+  preencherCartoes();
+  atualizarCartoes();
+}
+
+// preencher select
+function preencherCartoes() {
+  let select = document.getElementById("cartao");
+  select.innerHTML = "";
+
+  cartoes.forEach(c => {
+    select.innerHTML += `<option>${c}</option>`;
+  });
+}
+
+// mostrar cartões
+function atualizarCartoes() {
+  let lista = document.getElementById("listaCartoes");
+  lista.innerHTML = "";
+
+  cartoes.forEach(c => {
+    lista.innerHTML += `<div class="card">${c}</div>`;
+  });
+}
+
+// atualizar tela
+function atualizar() {
+
+  let total = 0;
+  let lista = document.getElementById("lista");
+  let faturas = document.getElementById("faturas");
+  let receber = document.getElementById("listaReceber");
+
+  lista.innerHTML = "";
+  faturas.innerHTML = "";
+  receber.innerHTML = "";
+
+  let agrupado = {};
+
+  lancamentos.forEach(l => {
+
+    total += l.valor;
+
+    // lista
+    lista.innerHTML += `
+      <div class="card">
+        ${l.desc} - R$ ${l.valor.toFixed(2)} <br>
+        ${l.cartao}
+      </div>
+    `;
+
+    // fatura
+    let data = new Date(l.data);
+    let mes = (data.getMonth()+1) + "/" + data.getFullYear();
+
+    if (!agrupado[l.cartao]) agrupado[l.cartao] = {};
+    if (!agrupado[l.cartao][mes]) agrupado[l.cartao][mes] = 0;
+
+    agrupado[l.cartao][mes] += l.valor;
+
+    // receber
+    if (l.tipo === "terceiro") {
+      receber.innerHTML += `
+        <div class="card">
+          ${l.pessoa} → R$ ${l.valor.toFixed(2)}
+        </div>
+      `;
+    }
+  });
+
+  document.getElementById("total").innerText = total.toFixed(2);
+
+  // montar fatura
+  for (let cartao in agrupado) {
+
+    faturas.innerHTML += `<h4>${cartao}</h4>`;
+
+    for (let mes in agrupado[cartao]) {
+      faturas.innerHTML += `
+        <div class="card">
+          ${mes} → R$ ${agrupado[cartao][mes].toFixed(2)}
+        </div>
+      `;
+    }
+  }
+}
+
+// inicialização
+preencherCartoes();
+atualizarCartoes();
+atualizar();
+
+</script>
+
+</body>
+</html>
