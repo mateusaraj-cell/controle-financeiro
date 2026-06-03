@@ -4,15 +4,13 @@
 <meta charset="UTF-8">
 <title>Controle Financeiro PRO</title>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <style>
 body {
   margin:0;
   font-family: Arial;
   display:flex;
   background:#0f172a;
-  color:#fff;
+  color:white;
 }
 
 .menu {
@@ -35,51 +33,3 @@ body {
 }
 
 .tela { display:none; }
-.tela.ativa { display:block; }
-
-.card {
-  background:#1e293b;
-  padding:12px;
-  margin-top:10px;
-  border-radius:8px;
-}
-input, select {
-  margin:5px;
-  padding:8px;
-}
-button {
-  padding:8px 12px;
-  cursor:pointer;
-}
-</style>
-</head>
-
-<body>
-
-<div class="menu">
-  <div onclick="abrir('dashboard')">📊 Dashboard</div>
-  <div onclick="abrir('pessoal')">💳 Pessoal</div>
-  <div onclick="abrir('terceiros')">👥 Terceiros</div>
-</div>
-
-<div class="conteudo">
-
-<div id="dashboard" class="tela ativa">
-  <h2>Dashboard</h2>
-  <canvas id="grafico"></canvas>
-</div>
-
-<div id="pessoal" class="tela">
-  <h2>Cartão Pessoal</h2>
-
-  <input id="desc" placeholder="Descrição">
-  <input id="valor" type="number" placeholder="Valor">
-  <button onclick="add()">Adicionar</button>
-
-  <div id="lista"></div>
-</div>
-
-<div id="terceiros" class="tela">
-  <h2>Terceiros</h2>
-
-  <input id="nome" placeholder="Pessoa">
