@@ -5,27 +5,14 @@
 <title>Controle Financeiro PRO</title>
 
 <style>
-body {
-  font-family: Arial;
-  padding:20px;
-  background:#f4f6f9;
-}
-input, select {
-  margin:5px;
-  padding:6px;
-}
-button {
-  padding:6px 10px;
-  cursor:pointer;
-}
+body { font-family: Arial; padding:20px; }
+input, select { margin:5px; padding:5px; }
+button { padding:6px 10px; cursor:pointer; }
 .card {
-  background:#fff;
-  border-radius:8px;
+  border:1px solid #ccc;
   padding:10px;
-  margin:10px 0;
-  box-shadow:0 2px 6px rgba(0,0,0,0.1);
+  margin-top:10px;
 }
-h2 { margin-top:20px; }
 </style>
 </head>
 
@@ -33,18 +20,9 @@ h2 { margin-top:20px; }
 
 <h1>💳 Controle Financeiro PRO</h1>
 
-<h3>Novo lançamento</h3>
-
 <input id="desc" placeholder="Descrição">
 <input id="valor" type="number" placeholder="Valor">
 <input id="parcelas" type="number" value="1">
-
-<select id="tipo">
-  <option value="meu">Meu</option>
-  <option value="terceiro">Terceiro</option>
-</select>
-
-<input id="pessoa" placeholder="Pessoa (se terceiro)">
 
 <select id="cartao">
   <option>Nubank</option>
@@ -56,6 +34,71 @@ h2 { margin-top:20px; }
 
 <h2>Total: R$ <span id="total">0</span></h2>
 
-<hr>
+<h3>Lançamentos</h3>
+<div id="lista"></div>
 
-<h3>💳 Fatura</h3>
+<script>
+
+let lancamentos = JSON.parse(localStorage.getItem("lancamentos")) || [];
+
+function adicionar() {
+
+  const desc = document.getElementById("desc").value;
+  const valor = parseFloat(document.getElementById("valor").value);
+  const parcelas = parseInt(document.getElementById("parcelas").value);
+  const cartao = document.getElementById("cartao").value;
+
+  if (!desc || isNaN(valor) || isNaN(parcelas) || parcelas <= 0) {
+    alert("Preencha corretamente");
+    return;
+  }
+
+  const valorParcela = valor / parcelas;
+
+  for (let i = 1; i <= parcelas; i++) {
+
+    const data = new Date();
+    data.setMonth(data.getMonth() + (i - 1));
+
+    lancamentos.push({
+      desc: desc + " (" + i + "/" + parcelas + ")",
+      valor: valorParcela,
+      cartao,
+      data
+    });
+  }
+
+  localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
+
+  atualizar();
+}
+
+function atualizar() {
+
+  let total = 0;
+  let lista = document.getElementById("lista");
+
+  lista.innerHTML = "";
+
+  lancamentos.forEach(l => {
+
+    total += l.valor;
+
+    lista.innerHTML += `
+      <div class="card">
+        ${l.desc} - R$ ${l.valor.toFixed(2)} <br>
+        ${l.cartao}
+      </div>
+    `;
+  });
+
+  document.getElementById("total").innerText = total.toFixed(2);
+}
+
+atualizar();
+
+</script>
+
+</body>
+</html>
+``
