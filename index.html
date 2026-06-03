@@ -18,12 +18,17 @@ body {
   background:#020617;
 }
 
-.menu div {
+.menu button {
+  width:100%;
   padding:15px;
+  border:none;
+  background:none;
+  color:white;
+  text-align:left;
   cursor:pointer;
 }
 
-.menu div:hover {
+.menu button:hover {
   background:#1e293b;
 }
 
@@ -39,31 +44,3 @@ body {
   background:#1e293b;
   padding:10px;
   margin-top:10px;
-  border-radius:8px;
-}
-
-input {
-  margin:5px;
-  padding:8px;
-}
-
-button {
-  padding:8px 12px;
-  cursor:pointer;
-}
-</style>
-
-</head>
-<body>
-
-<div class="menu">
-  <div onclick="trocar('dashboard')">📊 Dashboard</div>
-  <div onclick="trocar('pessoal')">💳 Pessoal</div>
-  <div onclick="trocar('terceiros')">👥 Terceiros</div>
-  <div onclick="trocar('receber')">💰 Receber</div>
-</div>
-
-<div class="conteudo">
-
-<div id="dashboard" class="tela ativa">
-  <h2>Dashboard</h2>
