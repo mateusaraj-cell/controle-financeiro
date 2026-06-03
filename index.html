@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Controle Financeiro</title>
+<title>Controle Financeiro PRO</title>
 
 <style>
 body {
@@ -37,13 +37,8 @@ body {
   padding:20px;
 }
 
-.tela {
-  display:none;
-}
-
-.tela.ativa {
-  display:block;
-}
+.tela { display:none; }
+.tela.ativa { display:block; }
 
 .card {
   background:#1e293b;
@@ -52,7 +47,7 @@ body {
   border-radius:8px;
 }
 
-input {
+input, select {
   margin:5px;
   padding:8px;
 }
@@ -69,119 +64,129 @@ button.acao {
 
 <div class="menu">
   <button onclick="abrir('dashboard')">📊 Dashboard</button>
-  <button onclick="abrir('pessoal')">💳 Pessoal</button>
-  <button onclick="abrir('terceiros')">👥 Terceiros</button>
-  <button onclick="abrir('receber')">💰 Receber</button>
+  <button onclick="abrir('lancar')">💳 Lançamentos</button>
+  <button onclick="abrir('fatura')">📄 Fatura</button>
 </div>
 
 <div class="conteudo">
 
+<!-- DASHBOARD -->
 <div id="dashboard" class="tela ativa">
   <h2>Dashboard</h2>
   <h3>Total: R$ <span id="total">0</span></h3>
 </div>
 
-<div id="pessoal" class="tela">
-  <h2>Pessoal</h2>
+<!-- LANÇAMENTO -->
+<div id="lancar" class="tela">
+  <h2>Novo Lançamento</h2>
+
   <input id="desc" placeholder="Descrição">
   <input id="valor" type="number" placeholder="Valor">
-  <button class="acao" onclick="addPessoal()">Adicionar</button>
-  <div id="listaP"></div>
+  <input id="parcelas" type="number" value="1">
+
+  <select id="cartao">
+    <option>Nubank</option>
+    <option>Itaú</option>
+    <option>Inter</option>
+  </select>
+
+  <button class="acao" onclick="add()">Adicionar</button>
+
+  <div id="lista"></div>
 </div>
 
-<div id="terceiros" class="tela">
-  <h2>Terceiros</h2>
-  <input id="nome" placeholder="Pessoa">
-  <input id="valorT" type="number" placeholder="Valor">
-  <button class="acao" onclick="addTerceiro()">Adicionar</button>
-  <div id="listaT"></div>
-</div>
-
-<div id="receber" class="tela">
-  <h2>Receber</h2>
-  <input id="busca" placeholder="Nome">
-  <button class="acao" onclick="buscar()">Buscar</button>
-  <div id="resultado"></div>
+<!-- FATURA -->
+<div id="fatura" class="tela">
+  <h2>Fatura</h2>
+  <div id="faturas"></div>
 </div>
 
 </div>
 
 <script>
 
-function abrir(tela) {
-  var telas = document.querySelectorAll(".tela");
+function abrir(id){
+  document.querySelectorAll(".tela").forEach(t => t.classList.remove("ativa"));
+  document.getElementById(id).classList.add("ativa");
+}
 
-  for (var i = 0; i < telas.length; i++) {
-    telas[i].classList.remove("ativa");
+let dados = JSON.parse(localStorage.getItem("dados")) || [];
+
+function add(){
+
+  let desc = document.getElementById("desc").value;
+  let valor = parseFloat(document.getElementById("valor").value);
+  let parcelas = parseInt(document.getElementById("parcelas").value);
+  let cartao = document.getElementById("cartao").value;
+
+  if(!desc || isNaN(valor) || isNaN(parcelas)) return;
+
+  let valorParcela = valor / parcelas;
+
+  for(let i=1;i<=parcelas;i++){
+
+    let data = new Date();
+    data.setMonth(data.getMonth() + (i-1));
+
+    dados.push({
+      desc: desc + " ("+i+"/"+parcelas+")",
+      valor: valorParcela,
+      cartao: cartao,
+      data: data
+    });
   }
 
-  document.getElementById(tela).classList.add("ativa");
-}
-
-var dados = JSON.parse(localStorage.getItem("dados")) || [];
-
-function addPessoal() {
-  var desc = document.getElementById("desc").value;
-  var valor = parseFloat(document.getElementById("valor").value);
-
-  if (!desc || isNaN(valor)) return;
-
-  dados.push({desc: desc, valor: valor, tipo: "meu"});
-  salvar();
-}
-
-function addTerceiro() {
-  var nome = document.getElementById("nome").value;
-  var valor = parseFloat(document.getElementById("valorT").value);
-
-  if (!nome || isNaN(valor)) return;
-
-  dados.push({desc: nome, valor: valor, tipo: "terceiro"});
-  salvar();
-}
-
-function salvar() {
   localStorage.setItem("dados", JSON.stringify(dados));
+
   atualizar();
 }
 
-function buscar() {
-  var nome = document.getElementById("busca").value;
+function atualizar(){
 
-  var total = 0;
-  var html = "";
+  let total = 0;
+  let lista = document.getElementById("lista");
+  let faturas = document.getElementById("faturas");
 
-  for (var i = 0; i < dados.length; i++) {
-    if (dados[i].tipo === "terceiro" && dados[i].desc === nome) {
-      total += dados[i].valor;
-      html += "<div class='card'>" + dados[i].desc + " - R$ " + dados[i].valor + "</div>";
-    }
-  }
+  lista.innerHTML = "";
+  faturas.innerHTML = "";
 
-  html += "<h3>Total: R$ " + total.toFixed(2) + "</h3>";
+  let agrupado = {};
 
-  document.getElementById("resultado").innerHTML = html;
-}
+  dados.forEach(d => {
 
-function atualizar() {
-  var total = 0;
+    total += d.valor;
 
-  var lp = document.getElementById("listaP");
-  var lt = document.getElementById("listaT");
+    lista.innerHTML += `
+      <div class="card">
+        ${d.desc} <br>
+        R$ ${d.valor.toFixed(2)} <br>
+        ${d.cartao}
+      </div>
+    `;
 
-  lp.innerHTML = "";
-  lt.innerHTML = "";
+    let data = new Date(d.data);
+    let mes = (data.getMonth()+1) + "/" + data.getFullYear();
 
-  for (var i = 0; i < dados.length; i++) {
-    total += dados[i].valor;
+    if(!agrupado[d.cartao]) agrupado[d.cartao] = {};
+    if(!agrupado[d.cartao][mes]) agrupado[d.cartao][mes] = 0;
 
-    var item = "<div class='card'>" + dados[i].desc + " - R$ " + dados[i].valor + "</div>";
-
-    if (dados[i].tipo === "meu") lp.innerHTML += item;
-    if (dados[i].tipo === "terceiro") lt.innerHTML += item;
-  }
+    agrupado[d.cartao][mes] += d.valor;
+  });
 
   document.getElementById("total").innerText = total.toFixed(2);
+
+  for(let cartao in agrupado){
+
+    faturas.innerHTML += `<h3>${cartao}</h3>`;
+
+    for(let mes in agrupado[cartao]){
+      faturas.innerHTML += `
+        <div class="card">
+          ${mes} → R$ ${agrupado[cartao][mes].toFixed(2)}
+        </div>
+      `;
+    }
+  }
 }
 
 atualizar();
