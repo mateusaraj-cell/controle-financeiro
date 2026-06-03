@@ -2,75 +2,60 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Controle Financeiro</title>
+<title>Controle Financeiro PRO</title>
 
 <style>
-body { font-family: Arial; padding:20px; }
-input { margin:5px; padding:5px; }
-button { padding:6px 10px; }
-.card {
-  border:1px solid #ccc;
-  padding:10px;
-  margin-top:10px;
+body {
+  font-family: Arial;
+  padding:20px;
+  background:#f4f6f9;
 }
+input, select {
+  margin:5px;
+  padding:6px;
+}
+button {
+  padding:6px 10px;
+  cursor:pointer;
+}
+.card {
+  background:#fff;
+  border-radius:8px;
+  padding:10px;
+  margin:10px 0;
+  box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+h2 { margin-top:20px; }
 </style>
-
 </head>
 
 <body>
 
-<h1>💳 Controle Financeiro</h1>
+<h1>💳 Controle Financeiro PRO</h1>
+
+<h3>Novo lançamento</h3>
 
 <input id="desc" placeholder="Descrição">
 <input id="valor" type="number" placeholder="Valor">
+<input id="parcelas" type="number" value="1">
+
+<select id="tipo">
+  <option value="meu">Meu</option>
+  <option value="terceiro">Terceiro</option>
+</select>
+
+<input id="pessoa" placeholder="Pessoa (se terceiro)">
+
+<select id="cartao">
+  <option>Nubank</option>
+  <option>Itaú</option>
+  <option>Inter</option>
+</select>
+
 <button onclick="adicionar()">Adicionar</button>
 
 <h2>Total: R$ <span id="total">0</span></h2>
 
-<div id="lista"></div>
+<hr>
 
-<script>
-
-let lancamentos = JSON.parse(localStorage.getItem("lancamentos")) || [];
-
-function adicionar() {
-  const desc = document.getElementById("desc").value;
-  const valor = parseFloat(document.getElementById("valor").value);
-
-  if (!desc || isNaN(valor)) {
-    alert("Preencha corretamente");
-    return;
-  }
-
-  lancamentos.push({ desc, valor });
-
-  localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
-
-  atualizar();
-}
-
-function atualizar() {
-  let total = 0;
-  let lista = document.getElementById("lista");
-
-  lista.innerHTML = "";
-
-  lancamentos.forEach(l => {
-    total += l.valor;
-
-    lista.innerHTML += `
-      <div class="card">
-        ${l.desc} - R$ ${l.valor}
-      </div>
-    `;
-  });
-
-  document.getElementById("total").innerText = total.toFixed(2);
-}
-
-atualizar();
-
-</script>
-
-</body>
-</html>
+<h3>💳 Fatura</h3>
