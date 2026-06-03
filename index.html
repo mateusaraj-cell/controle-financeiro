@@ -1,12 +1,54 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>Controle Financeiro</title>
-  </head>
-  <body>
-    <div id="root"></div>
+<head>
+  <meta charset="UTF-8">
+  <title>Controle Financeiro</title>
+</head>
 
-    <script type="module" src="/main.jsx"></script>
-  </body>
+<body style="font-family: Arial; padding:20px;">
+
+  <h1>💳 Controle Financeiro</h1>
+
+  <input id="desc" placeholder="Descrição">
+  <input id="valor" type="number" placeholder="Valor">
+  <button onclick="adicionar()">Adicionar</button>
+
+  <h2>Total: R$ <span id="total">0</span></h2>
+
+  <div id="lista"></div>
+
+  <script>
+    let lancamentos = [];
+
+    function adicionar() {
+      const desc = document.getElementById("desc").value;
+      const valor = parseFloat(document.getElementById("valor").value);
+
+      if (!desc || !valor) return;
+
+      lancamentos.push({ desc, valor });
+
+      atualizar();
+    }
+
+    function atualizar() {
+      let total = 0;
+      const lista = document.getElementById("lista");
+      lista.innerHTML = "";
+
+      lancamentos.forEach(l => {
+        total += l.valor;
+
+        lista.innerHTML += `
+          <div>
+            ${l.desc} - R$ ${l.valor}
+          </div>
+        `;
+      });
+
+      document.getElementById("total").innerText = total.toFixed(2);
+    }
+  </script>
+
+</body>
 </html>
