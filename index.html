@@ -1,33 +1,40 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Controle Financeiro</title>
-  <style>
-    body { font-family: Arial; padding:20px; }
-    input, select { margin:5px; padding:5px; }
-    button { padding:5px 10px; }
-    .card { margin-top:10px; padding:10px; border:1px solid #ccc; }
-  </style>
+<meta charset="UTF-8">
+<title>Controle Financeiro</title>
+
+<style>
+body { font-family: Arial; padding:20px; }
+input, select { margin:5px; padding:5px; }
+button { padding:6px 10px; cursor:pointer; }
+.card {
+  border:1px solid #ccc;
+  padding:10px;
+  margin-bottom:10px;
+  border-radius:8px;
+}
+.filtro button {
+  margin-right:5px;
+}
+</style>
+
 </head>
 
 <body>
 
-<h1>💳 Controle Financeiro Completo</h1>
+<h1>💳 Controle Financeiro PRO</h1>
 
 <h3>Novo Lançamento</h3>
 
 <input id="desc" placeholder="Descrição">
 <input id="valor" type="number" placeholder="Valor total">
-<input id="parcelas" type="number" placeholder="Parcelas" value="1">
-
+<input id="parcelas" type="number" value="1">
 <select id="tipo">
   <option value="meu">Meu</option>
   <option value="terceiro">Terceiro</option>
 </select>
-
-<input id="pessoa" placeholder="Nome (se for terceiro)">
-
+<input id="pessoa" placeholder="Pessoa (se terceiro)">
 <select id="cartao">
   <option>Nubank</option>
   <option>Itaú</option>
@@ -38,7 +45,16 @@
 
 <h2>Total Geral: R$ <span id="total">0</span></h2>
 
-<h3>📊 Fatura por cartão</h3>
+<hr>
+
+<h3>💳 Fatura por cartão</h3>
+
+<div class="filtro">
+  <button onclick="setFiltro('total')">Total</button>
+  <button onclick="setFiltro('meu')">Meus</button>
+  <button onclick="setFiltro('terceiro')">Terceiros</button>
+</div>
+
 <div id="fatura"></div>
 
 <hr>
@@ -48,7 +64,88 @@
 
 <script>
 let lancamentos = [];
+let filtro = "total";
+
+function setFiltro(f) {
+  filtro = f;
+  atualizar();
+}
 
 function adicionar() {
   const desc = document.getElementById("desc").value;
   const valor = parseFloat(document.getElementById("valor").value);
+  const parcelas = parseInt(document.getElementById("parcelas").value);
+  const tipo = document.getElementById("tipo").value;
+  const pessoa = document.getElementById("pessoa").value;
+  const cartao = document.getElementById("cartao").value;
+
+  let valorParcela = valor / parcelas;
+
+  for (let i = 1; i <= parcelas; i++) {
+    let data = new Date();
+    data.setMonth(data.getMonth() + (i - 1));
+
+    lancamentos.push({
+      desc: desc + " (" + i + "/" + parcelas + ")",
+      valor: valorParcela,
+      tipo,
+      pessoa: tipo === "terceiro" ? pessoa : null,
+      cartao,
+      data
+    });
+  }
+
+  atualizar();
+}
+
+function atualizar() {
+  let total = 0;
+  let lista = document.getElementById("lista");
+  let fatura = document.getElementById("fatura");
+
+  lista.innerHTML = "";
+  fatura.innerHTML = "";
+
+  let agrupado = {};
+
+  lancamentos.forEach(l => {
+
+    if (filtro === "meu" && l.tipo !== "meu") return;
+    if (filtro === "terceiro" && l.tipo !== "terceiro") return;
+
+    total += l.valor;
+
+    lista.innerHTML += `
+      <div class="card">
+        ${l.desc}<br>
+        R$ ${l.valor.toFixed(2)}<br>
+        ${l.cartao} | ${l.data.toLocaleDateString()}
+      </div>
+    `;
+
+    let mes = (l.data.getMonth()+1) + "/" + l.data.getFullYear();
+
+    if (!agrupado[l.cartao]) agrupado[l.cartao] = {};
+    if (!agrupado[l.cartao][mes]) agrupado[l.cartao][mes] = 0;
+
+    agrupado[l.cartao][mes] += l.valor;
+  });
+
+  document.getElementById("total").innerText = total.toFixed(2);
+
+  for (let cartao in agrupado) {
+    fatura.innerHTML += `<h4>${cartao}</h4>`;
+
+    for (let mes in agrupado[cartao]) {
+      fatura.innerHTML += `
+        <div class="card">
+          ${mes} → R$ ${agrupado[cartao][mes].toFixed(2)}
+        </div>
+      `;
+    }
+  }
+}
+</script>
+
+</body>
+</html>
