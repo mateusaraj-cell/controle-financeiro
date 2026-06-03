@@ -51,3 +51,258 @@ body {
   <div onclick="abrir('fixos')">📌 Contas Fixas</div>
   <div onclick="abrir('pessoal')">💳 Pessoal Cartão</div>
   <div onclick="abrir('terceiros')">👥 Terceiros Cartão</div>
+  <div onclick="abrir('receber')">💰 Receber Terceiros</div>
+  <div onclick="abrir('config')">⚙️ Configurações</div>
+</div>
+
+<div class="conteudo">
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="tela ativa">
+  <h2>Dashboard</h2>
+  <p>Total: R$ <span id="total">0</span></p>
+</div>
+
+<!-- FIXOS -->
+<div id="fixos" class="tela">
+  <h2>Contas Fixas</h2>
+
+  <input id="fixoDesc" placeholder="Descrição">
+  <input id="fixoValor" type="number" placeholder="Valor">
+
+  <button onclick="addFixo()">Adicionar</button>
+
+  <div id="listaFixos"></div>
+</div>
+
+<!-- PESSOAL -->
+<div id="pessoal" class="tela">
+  <h2>Pessoal Cartão</h2>
+
+  <input id="descP" placeholder="Descrição">
+  <input id="valorP" type="number" placeholder="Valor">
+  <input id="parcelasP" type="number" value="1">
+  <select id="cartaoP"></select>
+
+  <button onclick="addPessoal()">Adicionar</button>
+
+  <div id="listaPessoal"></div>
+</div>
+
+<!-- TERCEIROS -->
+<div id="terceiros" class="tela">
+  <h2>Terceiros Cartão</h2>
+
+  <input id="descT" placeholder="Descrição">
+  <input id="valorT" type="number" placeholder="Valor">
+  <input id="parcelasT" type="number" value="1">
+  <input id="pessoaT" placeholder="Pessoa">
+  <select id="cartaoT"></select>
+
+  <button onclick="addTerceiro()">Adicionar</button>
+
+  <div id="listaTerceiros"></div>
+</div>
+
+<!-- RECEBER -->
+<div id="receber" class="tela">
+  <h2>Receber Terceiros</h2>
+
+  <input id="fPessoa" placeholder="Nome">
+  <input id="fMes" placeholder="Ex: 6/2026">
+
+  <button onclick="filtrarReceber()">Buscar</button>
+
+  <div id="resultadoReceber"></div>
+</div>
+
+<!-- CONFIG -->
+<div id="config" class="tela">
+  <h2>Configurações</h2>
+
+  <h4>Cartões</h4>
+  <input id="novoCartao" placeholder="Novo cartão">
+  <button onclick="addCartao()">Adicionar</button>
+
+  <div id="listaCartoes"></div>
+</div>
+
+</div>
+
+<script>
+
+// navegação
+function abrir(tela) {
+  document.querySelectorAll(".tela").forEach(t => t.classList.remove("ativa"));
+  document.getElementById(tela).classList.add("ativa");
+}
+
+// dados
+let fixos = JSON.parse(localStorage.getItem("fixos")) || [];
+let lancamentos = JSON.parse(localStorage.getItem("lancamentos")) || [];
+let cartoes = JSON.parse(localStorage.getItem("cartoes")) || ["Nubank","Itaú"];
+
+// -------- CONFIG --------
+function addCartao() {
+  let nome = document.getElementById("novoCartao").value;
+  if (!nome) return;
+
+  cartoes.push(nome);
+  localStorage.setItem("cartoes", JSON.stringify(cartoes));
+
+  carregarCartoes();
+}
+
+function carregarCartoes() {
+  let lista = document.getElementById("listaCartoes");
+  lista.innerHTML = "";
+
+  cartoes.forEach(c => {
+    lista.innerHTML += `<div class="card">${c}</div>`;
+  });
+
+  preencherSelects();
+}
+
+// -------- FIXOS --------
+function addFixo() {
+  let desc = document.getElementById("fixoDesc").value;
+  let valor = parseFloat(document.getElementById("fixoValor").value);
+
+  if (!desc || isNaN(valor)) return;
+
+  fixos.push({ desc, valor });
+  localStorage.setItem("fixos", JSON.stringify(fixos));
+
+  atualizar();
+}
+
+// -------- PESSOAL --------
+function addPessoal() {
+  adicionarLancamento("meu",
+    document.getElementById("descP").value,
+    document.getElementById("valorP").value,
+    document.getElementById("parcelasP").value,
+    "",
+    document.getElementById("cartaoP").value
+  );
+}
+
+// -------- TERCEIROS --------
+function addTerceiro() {
+  adicionarLancamento("terceiro",
+    document.getElementById("descT").value,
+    document.getElementById("valorT").value,
+    document.getElementById("parcelasT").value,
+    document.getElementById("pessoaT").value,
+    document.getElementById("cartaoT").value
+  );
+}
+
+// -------- FUNÇÃO BASE --------
+function adicionarLancamento(tipo, desc, valor, parcelas, pessoa, cartao) {
+
+  valor = parseFloat(valor);
+  parcelas = parseInt(parcelas);
+
+  if (!desc || isNaN(valor) || isNaN(parcelas)) return;
+
+  let v = valor / parcelas;
+
+  for (let i = 1; i <= parcelas; i++) {
+
+    let data = new Date();
+    data.setMonth(data.getMonth() + (i - 1));
+
+    lancamentos.push({
+      desc: desc + " (" + i + "/" + parcelas + ")",
+      valor: v,
+      tipo,
+      pessoa,
+      cartao,
+      data
+    });
+  }
+
+  localStorage.setItem("lancamentos", JSON.stringify(lancamentos));
+
+  atualizar();
+}
+
+// -------- RECEBER --------
+function filtrarReceber() {
+  let nome = document.getElementById("fPessoa").value;
+  let mes = document.getElementById("fMes").value;
+
+  let total = 0;
+  let html = "";
+
+  lancamentos.forEach(l => {
+
+    let d = new Date(l.data);
+    let m = (d.getMonth()+1) + "/" + d.getFullYear();
+
+    if (l.tipo === "terceiro" && l.pessoa === nome && m === mes) {
+      total += l.valor;
+
+      html += `<div class="card">${l.desc} - R$ ${l.valor.toFixed(2)}</div>`;
+    }
+  });
+
+  html += `<h3>Total: R$ ${total.toFixed(2)}</h3>`;
+
+  document.getElementById("resultadoReceber").innerHTML = html;
+}
+
+// -------- ATUALIZAÇÃO --------
+function atualizar() {
+
+  let total = 0;
+
+  let lp = document.getElementById("listaPessoal");
+  let lt = document.getElementById("listaTerceiros");
+  let lf = document.getElementById("listaFixos");
+
+  lp.innerHTML = "";
+  lt.innerHTML = "";
+  lf.innerHTML = "";
+
+  fixos.forEach(f => {
+    lf.innerHTML += `<div class="card">${f.desc} - R$ ${f.valor}</div>`;
+    total += f.valor;
+  });
+
+  lancamentos.forEach(l => {
+    total += l.valor;
+
+    let html = `<div class="card">${l.desc} - R$ ${l.valor.toFixed(2)}</div>`;
+
+    if (l.tipo === "meu") lp.innerHTML += html;
+    if (l.tipo === "terceiro") lt.innerHTML += html;
+  });
+
+  document.getElementById("total").innerText = total.toFixed(2);
+}
+
+// preencher selects
+function preencherSelects() {
+  let p = document.getElementById("cartaoP");
+  let t = document.getElementById("cartaoT");
+
+  p.innerHTML = "";
+  t.innerHTML = "";
+
+  cartoes.forEach(c => {
+    p.innerHTML += `<option>${c}</option>`;
+    t.innerHTML += `<option>${c}</option>`;
+  });
+}
+
+// iniciar
+carregarCartoes();
+atualizar();
+
+</script>
+
+</body>
+</html>
